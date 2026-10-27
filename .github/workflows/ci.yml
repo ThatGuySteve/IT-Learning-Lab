@@ -30,10 +30,14 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: npm ci
       - run: npm run tauri build -- --bundles nsis -- --locked
-      - name: Install and exercise the Windows app offline
+      - name: Install the Windows app and prerequisite offline
         shell: pwsh
         timeout-minutes: 10
-        run: ./scripts/verify-windows-offline.ps1
+        run: ./scripts/verify-windows-offline.ps1 -Phase install
+      - name: Exercise the installed Windows app offline
+        shell: pwsh
+        timeout-minutes: 10
+        run: ./scripts/verify-windows-offline.ps1 -Phase incident
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -43,7 +43,8 @@ async function launch(port) {
 async function closeApp() {
   if (browser) { await browser.close(); browser = undefined; }
   if (app && app.exitCode === null) {
-    spawnSync("taskkill.exe", ["/PID", String(app.pid)], { encoding: "utf8" });
+    const result = spawnSync("taskkill.exe", ["/PID", String(app.pid)], { encoding: "utf8", timeout: 10000 });
+    if (result.error) throw result.error;
     for (let i = 0; i < 20 && app.exitCode === null; i++) await delay(500);
     if (app.exitCode === null) throw new Error("Desktop app did not close normally");
   }
@@ -62,9 +63,11 @@ try {
   const escalation = "Printer is unreachable after the move; ping failed. Please inspect the switch port and network.";
   await page.getByLabel("Escalation note").fill(escalation);
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("it-learning-lab.inc1001.v1") || "null")?.escalation)).toBe(escalation);
+  console.log("PASS: triage and initial diagnosis saved");
   await closeApp();
   await launch(19222);
   await expect(page.getByLabel("Escalation note")).toHaveValue(escalation);
+  console.log("PASS: escalation survived first restart");
   await page.getByRole("button", { name: "Escalate to network support" }).click();
   await page.getByRole("button", { name: "Inspect switch ports" }).click();
   await page.getByLabel("Access VLAN").fill("20");
@@ -79,14 +82,17 @@ try {
   await launch(19223);
   await expect(page.getByLabel("Resolution note")).toHaveValue(resolution);
   await expect(page.getByRole("row").filter({ hasText: "eth1" }).locator("td").nth(2)).toHaveText("20");
+  console.log("PASS: repair and resolution survived second restart");
   await page.getByRole("button", { name: "Review skills report" }).click();
   await expect(page.getByRole("heading", { name: "Incident completed" })).toBeVisible();
   await expect(page.getByText("Independent", { exact: true })).toBeVisible();
   await expect(page.getByText("Not yet met")).toHaveCount(0);
   await page.screenshot({ path: "test-results/windows-native/completed.png", fullPage: true });
+  console.log("PASS: independent completed report");
   await closeApp();
   await launch(19224);
   await expect(page.getByRole("heading", { name: "Incident completed" })).toBeVisible();
+  console.log("PASS: completed report survived third restart");
   page.once("dialog", dialog => dialog.accept());
   await page.getByRole("button", { name: "Reset and try again" }).click();
   await expect(page.getByRole("button", { name: "Start independent assessment" })).toBeVisible();
