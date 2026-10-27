@@ -21,7 +21,7 @@ Open the local address printed by Vite (normally `http://127.0.0.1:1420`). The d
 
 Choose guided practice or independent assessment. Read the ticket; inspect the printer, workstation and network plan; test the printer and a healthy reference; select a likely cause; write an escalation and switch to network support. Inspect the switch, change an access-port VLAN, test the printer and the separate network, write a resolution with rollback considerations, then review the skills report. Use **Reset attempt** to replay. Hints are optional; any hint makes the attempt assisted.
 
-The checks require technical state **and** evidence of the appropriate steps. They do not use an AI model. Notes are checked with simple terms, so read the feedback and limitations rather than treating the text score as a human evaluation.
+The checks require technical state **and** evidence of the appropriate steps. The handoff records your diagnosis, notes and observations when you send it; update and re-send it before the first change if needed. They do not use an AI model. Notes are checked with simple terms, so read the feedback and limitations rather than treating the text score as a human evaluation.
 
 ## Test and build
 

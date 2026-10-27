@@ -147,6 +147,98 @@ describe("incident workflow and grading", () => {
       "Assisted / guided",
     );
   });
+  it("does not credit observations or a handoff written after a change", () => {
+    const late = step(
+      start(),
+      { type: "start", mode: "independent" },
+      { type: "probe", target: "printer" },
+      { type: "probe", target: "reference" },
+      { type: "escalate" },
+      { type: "inspect", item: "switch" },
+      { type: "vlan", port: "eth1", value: 20 },
+      { type: "inspect", item: "ticket" },
+      { type: "inspect", item: "printer" },
+      { type: "inspect", item: "workstation" },
+      { type: "inspect", item: "plan" },
+      { type: "diagnosis", value: "vlan" },
+      { type: "escalation", value: notes.escalation },
+      { type: "escalate" },
+      { type: "probe", target: "printer" },
+      { type: "probe", target: "other" },
+      { type: "resolution", value: notes.resolution },
+    );
+    const checks = grade(late).checks;
+    expect(
+      checks.find((c) => c.label === "Troubleshooting evidence")?.passed,
+    ).toBe(false);
+    expect(checks.find((c) => c.label === "Likely diagnosis")?.passed).toBe(
+      false,
+    );
+    expect(
+      checks.find((c) => c.label === "Escalation and resolution notes")?.passed,
+    ).toBe(false);
+    expect(grade(late).complete).toBe(false);
+  });
+  it("migrates old saves without inventing pre-change evidence", () => {
+    const before = triaged();
+    const { beforeChange, handoff, ...legacyBefore } = before;
+    expect(parseSaved(JSON.stringify(legacyBefore))?.beforeChange).toEqual(
+      before.inspected,
+    );
+    expect(parseSaved(JSON.stringify(legacyBefore))?.handoff).toEqual({
+      diagnosis: handoff!.diagnosis,
+      note: handoff!.note,
+      inspected: [],
+      printerFailed: false,
+      referencePassed: false,
+    });
+    const after = completed();
+    const {
+      beforeChange: _beforeChange,
+      handoff: _handoff,
+      ...legacyAfter
+    } = after;
+    const restored = parseSaved(JSON.stringify(legacyAfter));
+    expect(restored).not.toBeNull();
+    expect(restored?.beforeChange).toEqual([]);
+    expect(restored?.handoff).toBeNull();
+    expect(grade(restored!).complete).toBe(false);
+  });
+
+  it("requires the evidence to be gathered before the handoff is sent", () => {
+    const sentEarly = step(
+      start(),
+      { type: "start", mode: "independent" },
+      { type: "diagnosis", value: "vlan" },
+      { type: "escalation", value: notes.escalation },
+      { type: "escalate" },
+      { type: "inspect", item: "ticket" },
+      { type: "inspect", item: "printer" },
+      { type: "inspect", item: "workstation" },
+      { type: "inspect", item: "plan" },
+      { type: "probe", target: "printer" },
+      { type: "probe", target: "reference" },
+      { type: "inspect", item: "switch" },
+    );
+    const notResent = step(
+      sentEarly,
+      { type: "vlan", port: "eth1", value: 20 },
+      { type: "probe", target: "printer" },
+      { type: "probe", target: "other" },
+      { type: "resolution", value: notes.resolution },
+    );
+    expect(grade(notResent).complete).toBe(false);
+    const resent = step(
+      sentEarly,
+      { type: "escalate" },
+      { type: "vlan", port: "eth1", value: 20 },
+      { type: "probe", target: "printer" },
+      { type: "probe", target: "other" },
+      { type: "resolution", value: notes.resolution },
+    );
+    expect(grade(resent).complete).toBe(true);
+  });
+
   it("blocks a configuration change before escalation or switch inspection", () => {
     const s = start();
     expect(reducer(s, { type: "vlan", port: "eth1", value: 20 })).toBe(s);

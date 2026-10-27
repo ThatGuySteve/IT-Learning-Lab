@@ -453,6 +453,13 @@ export default function App() {
                     }
                     placeholder="Record observations and what you need the network team to check."
                   />
+                  {session.revision > 0 && (
+                    <p className="fine">
+                      The handoff sent before the first change is used for
+                      assessment. Reset the attempt to send a new handoff before
+                      a repair.
+                    </p>
+                  )}
                   <button
                     className="primary"
                     onClick={() => dispatch({ type: "escalate" })}
