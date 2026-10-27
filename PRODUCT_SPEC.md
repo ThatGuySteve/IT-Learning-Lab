@@ -32,3 +32,11 @@ Choose target job path -> brief baseline assessment -> realistic incident ticket
 
 ## Long-term non-goals and commercial guardrails
 The project is NOT another generic LMS, unrestricted desktop virtualization stack, proprietary network OS replacement, browser-based SaaS or AI chat wrapper. Prioritize learning usefulness, testable adoption, contributor usability and first learner outcomes. No subscription/paywall discussion until usage evidence and buyer discovery. License exact reused dependencies before committing to open-source public distribution or commercial services.
+
+## Career progression and serious gamification — proposed
+
+IT Learning Lab is a fictional workplace where learners progress through realistic incidents. A casebook of connected incident stages, visible XP, levels, achievements and career-path milestones should make sustained practice rewarding. They must remain separate from evidence of skill: points measure participation; technical competence comes from deterministic assessment of relevant simulated actions, state and verification. Hints are a normal part of instruction and never reduce completion XP or prevent normal learning progression.
+
+A successful unassisted attempt may be recognized as an **independent incident completion**, but replaying a familiar incident is not sufficient evidence of mastery. Future independent mastery requires multiple meaningfully different, validated assessments. Competency evidence is shared across career paths by stable skill identifiers rather than duplicated per path. Replay should help maintain skills without repeatedly awarding completion XP. Progress remains local and offline, with no accounts, paid currencies, gambling mechanics, punitive streaks or required leaderboards.
+
+See [the proposed progression design](docs/design/serious-gamification.md) and [example screen](docs/design/progression-screen.svg). This section is a design proposal only: it does not change the scope or release criteria of milestone 01 or authorize implementation. The first proposed implementation, subject to approval, uses INC-1001 only.
