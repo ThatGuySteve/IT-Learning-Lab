@@ -72,13 +72,11 @@ test("a report alone cannot pass, hints change independence, invalid imports are
   page,
 }) => {
   await page.goto("/");
-  await page
-    .locator("input[type=file]")
-    .setInputFiles({
-      name: "bad.json",
-      mimeType: "application/json",
-      buffer: Buffer.from('{"schemaVersion":1,"command":"arbitrary"}'),
-    });
+  await page.locator("input[type=file]").setInputFiles({
+    name: "bad.json",
+    mimeType: "application/json",
+    buffer: Buffer.from('{"schemaVersion":1,"command":"arbitrary"}'),
+  });
   await expect(page.getByRole("status")).toContainText("invalid incident");
   await page
     .getByRole("button", { name: "Start independent assessment" })
@@ -103,4 +101,22 @@ test("reset remains available on a narrow screen", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "Start guided practice" }),
   ).toBeVisible();
+});
+
+test("early report feedback is recorded as assistance even without hints", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page
+    .getByRole("button", { name: "Start independent assessment" })
+    .click();
+  await expect(
+    page.getByText(
+      "Viewing an incomplete report marks the attempt as assisted.",
+    ),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Skills report" }).click();
+  await expect(page.getByText("Assisted / guided")).toBeVisible();
+  await expect(page.getByText("Early feedback: Viewed")).toBeVisible();
+  await expect(page.getByText("Hints used: 0")).toBeVisible();
 });

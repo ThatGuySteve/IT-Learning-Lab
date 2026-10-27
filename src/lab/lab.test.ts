@@ -181,7 +181,7 @@ describe("incident workflow and grading", () => {
   });
   it("migrates old saves without inventing pre-change evidence", () => {
     const before = triaged();
-    const { beforeChange, handoff, ...legacyBefore } = before;
+    const { beforeChange, handoff, feedbackUsed, ...legacyBefore } = before;
     expect(parseSaved(JSON.stringify(legacyBefore))?.beforeChange).toEqual(
       before.inspected,
     );
@@ -196,12 +196,14 @@ describe("incident workflow and grading", () => {
     const {
       beforeChange: _beforeChange,
       handoff: _handoff,
+      feedbackUsed: _feedbackUsed,
       ...legacyAfter
     } = after;
     const restored = parseSaved(JSON.stringify(legacyAfter));
     expect(restored).not.toBeNull();
     expect(restored?.beforeChange).toEqual([]);
     expect(restored?.handoff).toBeNull();
+    expect(restored?.feedbackUsed).toBe(true);
     expect(grade(restored!).complete).toBe(false);
   });
 
@@ -237,6 +239,19 @@ describe("incident workflow and grading", () => {
       { type: "resolution", value: notes.resolution },
     );
     expect(grade(resent).complete).toBe(true);
+  });
+
+  it("marks early assessment feedback as assisted without penalizing a completed report", () => {
+    const early = step(
+      start(),
+      { type: "start", mode: "independent" },
+      { type: "screen", screen: "report" },
+    );
+    expect(early.feedbackUsed).toBe(true);
+    expect(grade(early).independence).toBe("Assisted / guided");
+    const final = step(completed(), { type: "screen", screen: "report" });
+    expect(final.feedbackUsed).toBe(false);
+    expect(grade(final).independence).toBe("Independent");
   });
 
   it("blocks a configuration change before escalation or switch inspection", () => {

@@ -198,8 +198,8 @@ export default function App() {
                 Start independent assessment <span>→</span>
               </button>
               <p className="fine">
-                Independent completion requires the independent mode and no
-                hints.
+                Independent completion requires independent mode, no hints, and
+                no feedback viewed before all checks are met.
               </p>
             </section>
           </div>
@@ -262,6 +262,11 @@ export default function App() {
                 </button>
               ))}
             </nav>
+            {session.mode === "independent" && (
+              <p className="fine side-warning">
+                Viewing an incomplete report marks the attempt as assisted.
+              </p>
+            )}
             <div className="side-footer">
               <span>SESSION MODE</span>
               <strong>
@@ -629,6 +634,12 @@ export default function App() {
                     }
                     placeholder="Record the cause, change, test result and rollback consideration."
                   />
+                  {session.mode === "independent" && (
+                    <p className="fine">
+                      Viewing the report before all checks are met marks this
+                      attempt as assisted.
+                    </p>
+                  )}
                   <button className="primary" onClick={() => go("report")}>
                     Review skills report →
                   </button>
@@ -663,6 +674,12 @@ export default function App() {
                     </span>
                     <span>
                       Hints used: <strong>{session.hints}</strong>
+                    </span>
+                    <span>
+                      Early feedback:{" "}
+                      <strong>
+                        {session.feedbackUsed ? "Viewed" : "Not viewed"}
+                      </strong>
                     </span>
                   </div>
                 </section>
@@ -734,7 +751,7 @@ export default function App() {
             <span className="side-label">ASSISTANCE</span>
             <p>
               {session.mode === "independent"
-                ? "Hints are available, but using one marks this attempt as assisted."
+                ? "Hints and viewing an incomplete skills report mark this attempt as assisted."
                 : "Reveal hints one at a time when you need a nudge."}
             </p>
             {hints.slice(0, session.hints).map((h, i) => (

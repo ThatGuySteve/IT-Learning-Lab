@@ -754,3 +754,7 @@ th {
 main:focus {
   outline: none;
 }
+
+.side-warning {
+  margin: 14px 10px;
+}

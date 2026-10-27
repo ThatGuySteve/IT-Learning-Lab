@@ -31,6 +31,7 @@ export type Session = {
   vlans: PortVlans;
   revision: number;
   hints: number;
+  feedbackUsed: boolean;
   diagnosis: "" | "vlan" | "dns" | "power" | "dhcp";
   escalation: string;
   resolution: string;
@@ -62,6 +63,7 @@ export function newSession(scenario: Scenario = builtinScenario): Session {
     vlans: { ...scenario.network.initialVlans },
     revision: 0,
     hints: 0,
+    feedbackUsed: false,
     diagnosis: "",
     escalation: "",
     resolution: "",
@@ -76,7 +78,12 @@ export function reducer(s: Session, a: Action): Session {
     case "screen":
       return a.screen === "network" && s.role !== "network"
         ? s
-        : { ...s, screen: a.screen };
+        : {
+            ...s,
+            screen: a.screen,
+            feedbackUsed:
+              s.feedbackUsed || (a.screen === "report" && !grade(s).complete),
+          };
     case "inspect": {
       const inspected = s.inspected.includes(a.item)
         ? s.inspected
@@ -188,7 +195,7 @@ export function grade(s: Session) {
       label: "Likely diagnosis",
       passed: s.handoff?.diagnosis === "vlan",
       feedback:
-        "Choose the likely switch-port or VLAN issue based on the move, link, addressing and test evidence.",
+        "Choose a likely cause from your evidence and include it in the handoff.",
     },
     {
       label: "Configuration and network state",
@@ -198,7 +205,7 @@ export function grade(s: Session) {
         noCollateral &&
         reachable,
       feedback:
-        "Inspect the switch, restore the printer access port to the expected VLAN, and leave the other ports unchanged.",
+        "Inspect the switch, correct the affected port using the network plan, and leave the other ports unchanged.",
     },
     {
       label: "Post-change verification",
@@ -217,7 +224,7 @@ export function grade(s: Session) {
     checks,
     complete: checks.every((c) => c.passed),
     independence:
-      s.mode === "independent" && s.hints === 0
+      s.mode === "independent" && s.hints === 0 && !s.feedbackUsed
         ? "Independent"
         : "Assisted / guided",
     reachable,
@@ -270,6 +277,7 @@ const savedSchema = z.strictObject({
   vlans: portsSchema,
   revision: z.number().int().min(0).max(100000),
   hints: z.number().int().min(0).max(3),
+  feedbackUsed: z.boolean().optional(),
   diagnosis: z.enum(["", "vlan", "dns", "power", "dhcp"]),
   escalation: z.string().max(3000),
   resolution: z.string().max(3000),
@@ -293,6 +301,9 @@ export function parseSaved(text: string): Session | null {
     return {
       ...saved,
       scenario: scenario.data,
+      // Old saves did not record early feedback, so they cannot establish
+      // independent completion. A reset starts a fresh independent attempt.
+      feedbackUsed: saved.feedbackUsed ?? saved.mode === "independent",
       beforeChange:
         saved.beforeChange ?? (saved.revision === 0 ? saved.inspected : []),
       handoff: (() => {
