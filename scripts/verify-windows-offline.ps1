@@ -42,6 +42,14 @@ if (Get-WebViewRuntime) { throw 'WebView2 is still present; clean prerequisite t
 Write-Host 'Confirmed no registered WebView2 runtime before installation.'
 
 $ruleName = 'IT-Learning-Lab-CI-block-outbound'
+$guardPath = Join-Path $env:RUNNER_TEMP 'it-learning-lab-firewall-guard.ps1'
+@'
+Start-Sleep -Seconds 240
+Get-NetFirewallRule -DisplayName 'IT-Learning-Lab-CI-block-outbound' -ErrorAction SilentlyContinue | Remove-NetFirewallRule
+'@ | Set-Content -Path $guardPath -Encoding utf8
+# Recover the disposable runner's network even if the test itself hangs. If
+# the guard fires during a test, the final isolation assertion fails the run.
+$guard = Start-Process -FilePath (Get-Process -Id $PID).Path -ArgumentList '-NoProfile','-NonInteractive','-File', $guardPath -WindowStyle Hidden -PassThru
 try {
   New-NetFirewallRule -DisplayName $ruleName -Direction Outbound -Action Block -RemoteAddress Any | Out-Null
   if (Can-Connect $remote) { throw 'Outbound firewall precondition did not block the online preflight address' }
@@ -62,9 +70,11 @@ try {
   }
   node scripts/verify-windows-native.mjs $appExe.FullName
   if ($LASTEXITCODE -ne 0) { throw "Native incident test failed ($LASTEXITCODE)" }
+  if (-not (Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue)) { throw 'Outbound firewall rule was removed during the test' }
   if (Can-Connect $remote) { throw 'Outbound isolation was lost during the test' }
   Write-Host 'Native incident completed and persistence verified while outbound traffic was blocked.'
 } finally {
   Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue | Remove-NetFirewallRule
+  Stop-Process -Id $guard.Id -Force -ErrorAction SilentlyContinue
   Write-Host 'Removed temporary outbound firewall rule.'
 }
