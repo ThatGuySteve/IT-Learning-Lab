@@ -16,7 +16,11 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
+      - name: Install Playwright Chromium
+        timeout-minutes: 8
+        env:
+          DEBUG: pw:install
+        run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
   windows-installer:
     runs-on: windows-2022
