@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "INC-1001",
+  "title": "Warehouse printer offline",
+  "ticket": {
+    "reporter": "Maya Lee · Shipping",
+    "summary": "The shipping printer stopped responding after it was moved to another network jack.",
+    "impact": "The shipping desk cannot print labels. The printer's display is on and its cable is connected.",
+    "history": "Facilities moved the printer during scheduled work this morning. A neighboring workstation can still reach another device on the printer network."
+  },
+  "network": {
+    "switchName": "SW-WH-01",
+    "intendedVlan": 20,
+    "initialVlans": { "eth0": 20, "eth1": 10, "eth2": 20, "eth3": 10, "eth4": 10 },
+    "hosts": {
+      "workstation": { "name": "Shipping workstation", "address": "192.168.20.10/24" },
+      "printer": { "name": "Shipping printer", "address": "192.168.20.50/24" },
+      "reference": { "name": "Reference host", "address": "192.168.20.60/24" },
+      "otherA": { "name": "Other network host A", "address": "192.168.10.10/24" },
+      "otherB": { "name": "Other network host B", "address": "192.168.10.11/24" }
+    }
+  }
+}
