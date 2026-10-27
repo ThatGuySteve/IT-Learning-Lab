@@ -1,18 +1,29 @@
 // Drives the installed production WebView2 app on a disposable Windows runner.
-// CDP is enabled only for these test processes, not in the shipped app.
+// CDP is enabled by a temporary machine policy on the disposable CI runner,
+// not in the shipped app. Elevated WebView2 150+ ignores user env overrides:
+// https://github.com/MicrosoftEdge/WebView2Feedback/issues/5645
 import { spawn, spawnSync } from "node:child_process";
 import { mkdir } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 import { chromium, expect } from "@playwright/test";
 
 const executable = process.argv[2];
-if (process.platform !== "win32" || !executable) throw new Error("Expected the installed Windows executable");
+if (process.platform !== "win32" || process.env.GITHUB_ACTIONS !== "true" || !executable) {
+  throw new Error("Run only on a disposable Windows GitHub Actions runner");
+}
 await mkdir("test-results/windows-native", { recursive: true });
 let app, browser, page;
+const policyKey = "HKLM\\Software\\Policies\\Microsoft\\Edge\\WebView2\\AdditionalBrowserArguments";
+const policyName = "it-learning-lab.exe";
+if (spawnSync("reg.exe", ["query", policyKey, "/v", policyName], { stdio: "ignore" }).status === 0) {
+  throw new Error("An existing app debug policy is present; refusing to overwrite it");
+}
 
 async function launch(port) {
+  const args = `--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --remote-debugging-port=${port} --remote-allow-origins=*`;
+  const configured = spawnSync("reg.exe", ["add", policyKey, "/v", policyName, "/t", "REG_SZ", "/d", args, "/f"], { encoding: "utf8" });
+  if (configured.status !== 0) throw new Error(`Could not configure temporary WebView2 test policy: ${configured.stderr}`);
   app = spawn(executable, [], {
-    env: { ...process.env, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${port} --remote-allow-origins=*` },
     stdio: "ignore",
   });
   let error;
@@ -88,4 +99,5 @@ try {
   throw error;
 } finally {
   await closeApp().catch(() => { if (app) app.kill(); });
+  spawnSync("reg.exe", ["delete", policyKey, "/v", policyName, "/f"], { stdio: "ignore" });
 }
