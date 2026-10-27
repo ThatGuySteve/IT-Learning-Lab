@@ -59,7 +59,15 @@ try {
   Write-Host 'Confirmed a previously reachable external TCP endpoint is blocked.'
   if ($Phase -eq 'install') {
     $setup = Start-Process -FilePath $installer.FullName -ArgumentList '/S','/NS' -PassThru
-    if (-not $setup.WaitForExit(180000)) { Stop-Process -Id $setup.Id -Force; throw 'Offline installer timed out' }
+    if (-not $setup.WaitForExit(180000)) {
+      Write-Warning "Offline NSIS installer did not exit within 180 seconds (PID $($setup.Id))."
+      Get-CimInstance Win32_Process |
+        Where-Object { $_.Name -match 'setup|webview|edgeupdate|msiexec|nsis' } |
+        Select-Object ProcessId, ParentProcessId, Name, CommandLine |
+        Format-List | Out-String | Write-Host
+      Stop-Process -Id $setup.Id -Force -ErrorAction SilentlyContinue
+      throw 'Offline installer timed out; inspect prerequisite child processes above'
+    }
     if ($setup.ExitCode -ne 0) { throw "Offline installer returned $($setup.ExitCode)" }
     $installedRuntime = Get-WebViewRuntime
     if (-not $installedRuntime) { throw 'Embedded installer did not register WebView2 while offline' }
