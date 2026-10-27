@@ -22,6 +22,8 @@ The concept borrows broad ideas from Boot.dev's emphasis on [structured paths an
 
 **Example values for the proposed first implementation:** a first, validated INC-1001 completion awards **100 XP**, whether guided or independent. Level 1 starts at 0 total XP, level 2 at 100, and level 3 at 250; thresholds are illustrative and must be tuned as content grows. Progress toward level 3 after this incident is **0 of 150 XP**, not 100 of 150. Show total XP separately. An unfinished or invalid incident, an individual click, and a reset award 0 XP.
 
+Make the journey tangible through an original **casebook**: a short briefing, visible stages for investigation and handoff, a consequential simulated action, and an after-action debrief. A path can show connected case milestones and the next available assignment, while completed cases remain replayable. The fictional workplace supplies context and continuity; it never supplies proof of competence. With only INC-1001 available, show its actual stages and clearly label later content as future work.
+
 A first completion also earns a **First resolution** achievement, explicitly meaning the incident's current checklist passed. It is not a claim of professional competence. In a later increment, a qualifying unassisted replay may earn **Independent incident completion**, but adds no more XP for that incident. Viewing an incomplete skills report counts as assistance under PR #1's current rule, as do its hints; explain this before the learner opens it. Neither assistance nor mistakes reduce the first completion award, erase progress, or prevent another practice attempt.
 
 ## 2. Local data and versioning
@@ -63,7 +65,7 @@ The broader paths remain Help Desk, Desktop Support, Networking, Systems Adminis
 
 ![Static example of the proposed progression screen](progression-screen.svg)
 
-The concept uses the existing warm neutral and green visual language, clear incident labels and a restrained sense of advancement. The level tile, first-resolution marker and progress line provide feedback; evidence cards separately say **Guided practice**, and mastery is **Not yet verified**. The replay card explicitly says it earns no additional completion XP. It shows sample data for illustration and is not an interactive feature or a claim that future missions exist.
+The concept uses the existing warm neutral and green visual language, a connected case-stage path, clear incident labels and a restrained sense of advancement. The level tile, first-resolution marker and progress line provide feedback; evidence cards separately say **Guided practice**, and mastery is **Not yet verified**. The replay card explicitly says it earns no additional completion XP. It shows sample data for illustration and is not an interactive feature or a claim that future missions exist.
 
 Support keyboard navigation and visible focus, text labels alongside color/icons, scalable text, reduced motion, and a subdued presentation that removes celebratory animation and deemphasizes XP without hiding assessment feedback. Never require animation, audio or color to understand state. No paid currencies, randomized rewards, gambling, punitive streaks, mandatory leaderboards, accounts or monetization.
 

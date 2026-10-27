@@ -35,7 +35,7 @@ The project is NOT another generic LMS, unrestricted desktop virtualization stac
 
 ## Career progression and serious gamification — proposed
 
-IT Learning Lab is a fictional workplace where learners progress through realistic incidents. Visible XP, levels, achievements and career-path milestones should make sustained practice rewarding. They must remain separate from evidence of skill: points measure participation; technical competence comes from deterministic assessment of relevant simulated actions, state and verification. Hints are a normal part of instruction and never reduce completion XP or prevent normal learning progression.
+IT Learning Lab is a fictional workplace where learners progress through realistic incidents. A casebook of connected incident stages, visible XP, levels, achievements and career-path milestones should make sustained practice rewarding. They must remain separate from evidence of skill: points measure participation; technical competence comes from deterministic assessment of relevant simulated actions, state and verification. Hints are a normal part of instruction and never reduce completion XP or prevent normal learning progression.
 
 A successful unassisted attempt may be recognized as an **independent incident completion**, but replaying a familiar incident is not sufficient evidence of mastery. Future independent mastery requires multiple meaningfully different, validated assessments. Competency evidence is shared across career paths by stable skill identifiers rather than duplicated per path. Replay should help maintain skills without repeatedly awarding completion XP. Progress remains local and offline, with no accounts, paid currencies, gambling mechanics, punitive streaks or required leaderboards.
 

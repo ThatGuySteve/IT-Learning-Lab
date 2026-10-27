@@ -32,9 +32,13 @@
   <text x="292" y="251" fill="#3c6b4d" font-family="Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="1.6">CURRENT CAREER PATH</text>
   <text x="292" y="286" fill="#1f3b2b" font-family="Georgia,serif" font-size="27">Help desk to network support</text>
   <text x="292" y="311" fill="#486654" font-family="Arial,sans-serif" font-size="13">Build from troubleshooting toward confident network changes.</text>
-  <text x="292" y="355" fill="#345744" font-family="Arial,sans-serif" font-size="11" font-weight="700">AVAILABLE INCIDENTS</text>
-  <text x="976" y="355" text-anchor="end" fill="#345744" font-family="Arial,sans-serif" font-size="11" font-weight="700">1 / 1 completed</text>
-  <rect x="292" y="370" width="684" height="7" rx="3.5" fill="#cbdccf"/><rect x="292" y="370" width="684" height="7" rx="3.5" fill="#4b8560"/>
+  <text x="292" y="345" fill="#345744" font-family="Arial,sans-serif" font-size="10" font-weight="700" letter-spacing=".7">INC-1001 · CASE STAGES</text>
+  <text x="976" y="345" text-anchor="end" fill="#345744" font-family="Arial,sans-serif" font-size="11" font-weight="700">1 / 1 incidents completed</text>
+  <path d="M330 369H938" stroke="#4b8560" stroke-width="3"/>
+  <circle cx="330" cy="369" r="7" fill="#4b8560"/><circle cx="634" cy="369" r="7" fill="#4b8560"/><circle cx="938" cy="369" r="7" fill="#4b8560"/>
+  <text x="330" y="394" text-anchor="middle" fill="#345744" font-family="Arial,sans-serif" font-size="10" font-weight="700">TRIAGE</text>
+  <text x="634" y="394" text-anchor="middle" fill="#345744" font-family="Arial,sans-serif" font-size="10" font-weight="700">HANDOFF</text>
+  <text x="938" y="394" text-anchor="middle" fill="#345744" font-family="Arial,sans-serif" font-size="10" font-weight="700">VERIFIED REPAIR</text>
   <!-- Level card -->
   <rect x="1030" y="215" width="350" height="194" rx="14" fill="#fff" stroke="#dde7dd" filter="url(#shadow)"/>
   <rect x="1060" y="244" width="48" height="48" rx="13" fill="#e3efe4"/>
