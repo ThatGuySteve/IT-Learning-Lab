@@ -41,10 +41,10 @@ On Windows, install Node.js, [Rust and the Tauri prerequisites](https://v2.tauri
 ```powershell
 npm ci
 npm run tauri dev
-npm run tauri build -- --bundles nsis
+npm run tauri build -- --bundles nsis -- --locked
 ```
 
-A successful build should place an NSIS setup executable under `src-tauri/target/release/bundle/nsis/`. The configuration requests an embedded WebView2 offline installer, but this repository's initial Windows build and offline install **have not been verified**. A Windows GitHub Actions job attempts an experimental build; a green build alone is not an installation or runtime test. Review Rust dependency licenses and bundled notices before distributing any artifact.
+A successful build should place an NSIS setup executable under `src-tauri/target/release/bundle/nsis/`. The configuration requests an embedded WebView2 offline installer. An initial Windows GitHub Actions build produced an experimental installer; check the latest CI run for the current revision. Offline installation and a complete Windows learning session have not yet been verified. The Rust graph is locked and a preliminary notice inventory is in `licenses/RUST-DEPENDENCIES.txt`. Review the notices and the separate Microsoft WebView2 SDK and runtime terms before distributing any artifact.
 
 ## Architecture, safety and credits
 

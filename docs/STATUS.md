@@ -10,17 +10,17 @@ The scenario is a strictly validated, size-limited, version 1 JSON document. Imp
 
 - NetSim: 72 tests and build passed; NetQuest: 283 tests and frontend build passed. Details and exact revisions are in [FOUNDATION.md](FOUNDATION.md).
 - This project: `npm test` passed 9 tests; `npm run build` passed. Tests cover simulated isolation, correction, reversal, unrelated traffic, wrong-port/collateral changes, invalid inputs, stale verification, scoring, save parsing and reset.
-- `npm run test:e2e`: 3 Playwright tests passed using Chromium 153 on Linux. The complete learner path included a reload, offline browser operation after the page loaded, correct repair, report and reset; additional tests covered hints, rejected import and reset on a narrow screen. No external request was observed during the workflow. This tests the browser build, not the native Windows wrapper.
+- `npm run test:e2e`: 4 Playwright tests passed using Chromium 153 on Linux. The complete learner path included a reload, offline browser operation after the page loaded, correct repair, report and reset; additional tests covered hints, rejected import, reset on a narrow screen, and automated WCAG checks on five screens. No external request was observed during the workflow. This tests the browser build, not the native Windows wrapper.
 - `npm audit --audit-level=moderate`: no known npm vulnerabilities reported at inspection time, including development dependencies. It is not a guarantee of safety or a Rust dependency audit.
 
 ## Known limits
 
-- Windows NSIS/Tauri installer configuration and CI job are present but **not yet verified on Windows**, and the Rust dependency graph/third-party notices need review before distribution. The Linux host had no Rust toolchain or Windows runtime. CI artifacts, if produced, are experimental; a build alone does not prove offline installation or runtime behavior.
-- The requested WebView2 `offlineInstaller` setting intends a self-contained prerequisite for offline installation, but it still needs a successful Windows build and an actual offline installation test. Installation and updates require a separate review; ordinary sessions use local assets.
+- A Windows GitHub Actions runner built and uploaded an NSIS installer for initial PR head `ad07bf29a0514282af0d753ae214a769c219188d`. The current revision adds a locked Rust graph and a Windows installation/process smoke test; inspect current CI for its result. A complete native learning session and offline installation remain unverified. The Rust and Microsoft WebView2 SDK/runtime notices need review before distribution. The Linux host initially lacked Rust and still lacks a Windows runtime; an isolated Rust toolchain was used to lock and inventory the Windows dependency graph. All installer artifacts are experimental.
+- The requested WebView2 `offlineInstaller` setting intends a self-contained prerequisite for offline installation, but it still needs an actual offline installation test. Installation and updates require a separate review; ordinary sessions use local assets.
 - Browser use requires a local preview server to load the built assets. Once loaded, the tested learning session works with browser networking offline. Browser storage belongs to its origin; clearing site data removes progress. Native storage persistence across upgrades has not been tested.
 - The model is a teaching approximation, not a real network or vendor OS. The app does not simulate print queues/services, DHCP, DNS, trunking or routing. A link-up display describes this scenario's fixed links, not a complete physical-layer simulator. Each test starts with fresh simulated ARP/MAC state.
 - Notes are checked with simple, disclosed keyword/length rules. These may miss good wording or accept poor prose; they do not establish communication competence by themselves. Local data can be edited and is not a tamper-resistant exam or encrypted record.
-- Keyboard focus, labels and responsive layout were considered; formal accessibility audit and Windows screen-reader testing remain outstanding.
+- Keyboard focus, labels and responsive layout were considered. Automated axe-core WCAG scans passed on five screens; a formal accessibility audit and Windows screen-reader testing remain outstanding.
 
 ## Recommended next milestone (approval required)
 

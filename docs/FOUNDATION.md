@@ -20,7 +20,7 @@ NetSim's full app declares React, xterm, XYFlow, fflate, lz-string and Zustand p
 
 NetQuest declares FastAPI, Uvicorn and Pydantic on the backend plus React, XYFlow, Lucide and Zustand on the frontend. A metadata scan of 61 installed top-level frontend packages reported MIT (44), ISC (11), BSD-3-Clause (2), Apache-2.0 (2), and MPL-2.0 (2). Selected installed Python package metadata reported MIT or BSD-3-Clause; this was not a complete legal review of its transitive graph. None of NetQuest is distributed in this project.
 
-This app's locked production npm packages are React, React DOM, Scheduler and Zod, each MIT, with their original license texts retained. Development dependencies and any eventual Rust/Tauri bundle have their own transitive terms. **The Windows Rust dependency graph and packaged notices have not yet been audited; do not treat an experimental installer as a reviewed release.**
+This app's locked production npm packages are React, React DOM, Scheduler and Zod, each MIT, with their original license texts retained. Development dependencies and the Rust/Tauri bundle have their own transitive terms. `src-tauri/Cargo.lock` pins the Rust graph; `licenses/RUST-DEPENDENCIES.txt` inventories 242 Windows-target crates, including build dependencies, with available license texts. Five crates lacked texts in their published archives; supplemental texts and sources are recorded. The crate `webview2-com-sys` also contains Microsoft loader libraries, whose terms are separate from its Rust MIT declaration. **Microsoft WebView2 loader/runtime terms and the final packaged notice set still require release review; do not treat an experimental installer as a reviewed release.**
 
 ## Tradeoffs and boundary
 
