@@ -44,7 +44,9 @@ npm run tauri dev
 npm run tauri build -- --bundles nsis -- --locked
 ```
 
-A successful build should place an NSIS setup executable under `src-tauri/target/release/bundle/nsis/`. The configuration requests an embedded WebView2 offline installer. An initial Windows GitHub Actions build produced an experimental installer; check the latest CI run for the current revision. Offline installation and a complete Windows learning session have not yet been verified. The Rust graph is locked and a preliminary notice inventory is in `licenses/RUST-DEPENDENCIES.txt`. Review the notices and the separate Microsoft WebView2 SDK and runtime terms before distributing any artifact.
+A successful build should place an NSIS setup executable under `src-tauri/target/release/bundle/nsis/`. The configuration requests an embedded WebView2 offline installer. Check the current CI run for installation and native-session results; see [status](docs/STATUS.md) for verified coverage. The Rust graph is locked, and notices include separate Microsoft SDK and runtime information. Before distributing a build, review the applicable Microsoft runtime terms and required end-user disclosures.
+
+IT Learning Lab itself does not implement analytics or telemetry. Its Windows wrapper uses Microsoft's WebView2 runtime, which has its own required diagnostic-data collection, optional diagnostics controlled by Windows settings, crash reporting, and online update behavior. See [Microsoft's WebView2 data and privacy documentation](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/data-privacy) and `licenses/MICROSOFT-WEBVIEW2-RUNTIME.txt`. Ordinary learning sessions do not require an internet connection.
 
 ## Architecture, safety and credits
 

@@ -34,7 +34,8 @@ if ($runtime) {
   Write-Host "Removing preinstalled WebView2 $runtime from disposable runner"
   $runtimeSetup = Join-Path ${env:ProgramFiles(x86)} "Microsoft\EdgeWebView\Application\$runtime\Installer\setup.exe"
   if (-not (Test-Path $runtimeSetup)) { throw "Cannot find runtime setup: $runtimeSetup" }
-  $remove = Start-Process $runtimeSetup -ArgumentList '--uninstall','--msedgewebview','--system-level','--force-uninstall' -Wait -PassThru
+  $remove = Start-Process $runtimeSetup -ArgumentList '--uninstall','--msedgewebview','--system-level','--force-uninstall' -PassThru
+  if (-not $remove.WaitForExit(90000)) { Stop-Process -Id $remove.Id -Force; throw 'Runtime removal timed out' }
   Write-Host "Runtime removal exit code: $($remove.ExitCode)"
 }
 if (Get-WebViewRuntime) { throw 'WebView2 is still present; clean prerequisite test cannot proceed' }
@@ -54,7 +55,7 @@ try {
   $installDir = Join-Path $env:LOCALAPPDATA 'IT Learning Lab'
   $appExe = Get-ChildItem $installDir -Filter 'it-learning-lab.exe' -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
   if (-not $appExe) { throw "Installed executable not found in $installDir" }
-  foreach ($notice in @('RUST-DEPENDENCIES.txt','MICROSOFT-WEBVIEW2-SDK-BSD.txt')) {
+  foreach ($notice in @('RUST-DEPENDENCIES.txt','RUST-MPL-SOURCES.txt','MICROSOFT-WEBVIEW2-SDK-BSD.txt','MICROSOFT-WEBVIEW2-RUNTIME.txt')) {
     if (-not (Get-ChildItem $installDir -Filter $notice -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1)) {
       throw "Installed notice missing: $notice"
     }
