@@ -1,0 +1,26 @@
+Microsoft Edge WebView2 Runtime
+
+The Windows installer contains Microsoft's Evergreen WebView2 standalone
+runtime installer. It is separate from the open-source SDK loader and from
+the MIT-licensed IT Learning Lab code. Microsoft supplies the applicable
+developer terms at https://developer.microsoft.com/en-us/microsoft-edge/webview2/
+(choose a runtime download to view them). Microsoft's separate end-user page
+is https://developer.microsoft.com/en-us/microsoft-edge/webview2/consumer/.
+Microsoft distinguishes the two here:
+https://github.com/MicrosoftEdge/WebView2Feedback/issues/4388
+See Microsoft's distribution
+guidance at https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution.
+
+Microsoft says WebView2 collects required diagnostic data, may send crash
+reports, and follows Windows diagnostic-data settings for optional data:
+https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/data-privacy
+WebView2 uses Microsoft Defender SmartScreen by default unless disabled; it
+may collect and send information to Microsoft. See the Microsoft privacy
+statement https://aka.ms/privacy and the Edge privacy whitepaper
+https://learn.microsoft.com/en-us/microsoft-edge/privacy-whitepaper#smartscreen.
+The Evergreen runtime can also check for and install updates when online.
+The app itself does not implement analytics or telemetry, and ordinary
+learning does not require an internet connection.
+
+This notice is not a substitute for reviewing and meeting the Microsoft
+runtime distribution terms for the exact installer being released.

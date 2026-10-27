@@ -1,0 +1,12 @@
+[package]
+name = "it-learning-lab"
+version = "0.1.0"
+description = "Offline IT support practice"
+authors = ["IT Learning Lab contributors"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }

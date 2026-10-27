@@ -1,0 +1,17 @@
+# Windows distribution and privacy review
+
+Reviewed 2026-10-27. This records engineering evidence and outstanding decisions; it is not a legal opinion or authorization to distribute an installer.
+
+| Component | Finding | Material supplied |
+| --- | --- | --- |
+| IT Learning Lab and NetSim subset | Original work and the pinned, unmodified NetSim engine subset are MIT licensed. NetSim's original copyright and permission notice must accompany distributions. | `licenses/IT-LEARNING-LAB-MIT.txt`, `licenses/NETSIM-MIT.txt`; pinned source in [FOUNDATION.md](FOUNDATION.md). |
+| Production JavaScript | The lockfile identifies React, React DOM, Scheduler and Zod as the production dependencies, each MIT. | Their separate license texts in `licenses/`. |
+| Windows Rust/Tauri graph | The lockfile and Windows-target notice inventory cover 242 registry crates, including build dependencies; the shipped runtime graph is a subset. The graph includes MPL-2.0 packages. | `src-tauri/Cargo.lock`, `licenses/RUST-DEPENDENCIES.txt`, and corresponding source locations in `licenses/RUST-MPL-SOURCES.txt`. No crate source modifications are shipped. |
+| Microsoft WebView2 SDK loader | The pinned `webview2-com-sys` source links the Microsoft loader statically on the MSVC build. Upstream's pinned source identifies SDK 1.0.3800.47, whose license is separate from the Rust crate's MIT license. | Full BSD-style SDK notice in `licenses/MICROSOFT-WEBVIEW2-SDK-BSD.txt`. |
+| Microsoft WebView2 Evergreen runtime | The configured NSIS installer embeds a Microsoft runtime installer. Microsoft's runtime is proprietary and separately licensed; the SDK's BSD license does not cover it. The Evergreen installer can change between builds independently of Cargo.lock. | `licenses/MICROSOFT-WEBVIEW2-RUNTIME.txt` links to Microsoft's developer and end-user terms and privacy information. |
+
+The notices directory is bundled with the desktop app, but an installed notice by itself does not establish that all Microsoft distribution requirements or end-user agreement requirements are satisfied. Microsoft's WebView2 team distinguishes [developer and end-user licensing](https://github.com/MicrosoftEdge/WebView2Feedback/issues/4388). The project owner should review the terms that apply to the exact runtime installer and determine the required notices and agreement flow before offering a public Windows release. Do not describe the runtime as MIT licensed or a completed legal sign-off.
+
+The application implements no analytics or telemetry. [Microsoft documents](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/data-privacy) that WebView2 collects required diagnostics, follows Windows settings for optional diagnostics, and can report crashes. The runtime may also update when online. This is distinct from sending the learner's progress to an IT Learning Lab service; no such service exists. It does mean that a literal **zero platform telemetry** requirement has not been met or verified. Resolve that requirement before calling the Windows distribution ready. When the machine is disconnected, learning should not require any network access; see the Windows CI results for the test performed.
+
+Known distribution limits: no verified signed installer, no upgrade-persistence or uninstall/reinstall-persistence test, no formal screen-reader audit, and no independent legal review. Installer artifacts from CI are experimental.

@@ -1,0 +1,95 @@
+# Run only on a disposable, elevated Windows CI runner: this removes WebView2
+# and temporarily blocks outbound traffic to exercise a clean offline install.
+param([Parameter(Mandatory=$true)][ValidateSet('install','incident')][string]$Phase)
+$ErrorActionPreference = 'Stop'
+
+function Get-WebViewRuntime {
+  $keys = @(
+    'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}',
+    'HKCU:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+  )
+  foreach ($key in $keys) {
+    $item = Get-ItemProperty -Path $key -ErrorAction SilentlyContinue
+    if ($item -and $item.pv -and $item.pv -ne '0.0.0.0') { return $item.pv }
+  }
+  return $null
+}
+
+function Can-Connect([string]$address) {
+  $tcp = [System.Net.Sockets.TcpClient]::new()
+  try {
+    $pending = $tcp.ConnectAsync($address, 443)
+    return $pending.Wait(5000) -and $tcp.Connected
+  } catch { return $false } finally { $tcp.Dispose() }
+}
+
+$installer = Get-ChildItem src-tauri/target/release/bundle/nsis/*-setup.exe | Select-Object -First 1
+if (-not $installer) { throw 'Installer not found' }
+$remote = (Resolve-DnsName github.com -Type A | Where-Object IPAddress | Select-Object -First 1).IPAddress
+if (-not $remote -or -not (Can-Connect $remote)) { throw 'Online preflight failed; cannot prove isolation' }
+
+if ($Phase -eq 'install') {
+  Stop-Service edgeupdate, edgeupdatem -Force -ErrorAction SilentlyContinue
+  Get-Process msedgewebview2 -ErrorAction SilentlyContinue | Stop-Process -Force
+  $runtime = Get-WebViewRuntime
+  if ($runtime) {
+    Write-Host "Removing preinstalled WebView2 $runtime from disposable runner"
+    $runtimeSetup = Join-Path ${env:ProgramFiles(x86)} "Microsoft\EdgeWebView\Application\$runtime\Installer\setup.exe"
+    if (-not (Test-Path $runtimeSetup)) { throw "Cannot find runtime setup: $runtimeSetup" }
+    $remove = Start-Process $runtimeSetup -ArgumentList '--uninstall','--msedgewebview','--system-level','--force-uninstall' -PassThru
+    if (-not $remove.WaitForExit(90000)) { Stop-Process -Id $remove.Id -Force; throw 'Runtime removal timed out' }
+    Write-Host "Runtime removal exit code: $($remove.ExitCode)"
+  }
+  if (Get-WebViewRuntime) { throw 'WebView2 is still present; clean prerequisite test cannot proceed' }
+  Write-Host 'Confirmed no registered WebView2 runtime before installation.'
+}
+
+$ruleName = 'IT-Learning-Lab-CI-block-outbound'
+$guardPath = Join-Path $env:RUNNER_TEMP 'it-learning-lab-firewall-guard.ps1'
+@'
+Start-Sleep -Seconds 240
+Get-NetFirewallRule -DisplayName 'IT-Learning-Lab-CI-block-outbound' -ErrorAction SilentlyContinue | Remove-NetFirewallRule
+'@ | Set-Content -Path $guardPath -Encoding utf8
+# Recover the disposable runner's network even if the test itself hangs. If
+# the guard fires during a test, the final isolation assertion fails the run.
+$guard = Start-Process -FilePath (Get-Process -Id $PID).Path -ArgumentList '-NoProfile','-NonInteractive','-File', $guardPath -WindowStyle Hidden -PassThru
+try {
+  New-NetFirewallRule -DisplayName $ruleName -Direction Outbound -Action Block -RemoteAddress Any | Out-Null
+  if (Can-Connect $remote) { throw 'Outbound firewall precondition did not block the online preflight address' }
+  Write-Host 'Confirmed a previously reachable external TCP endpoint is blocked.'
+  if ($Phase -eq 'install') {
+    $setup = Start-Process -FilePath $installer.FullName -ArgumentList '/S','/NS' -PassThru
+    if (-not $setup.WaitForExit(180000)) {
+      Write-Warning "Offline NSIS installer did not exit within 180 seconds (PID $($setup.Id))."
+      Get-CimInstance Win32_Process |
+        Where-Object { $_.Name -match 'setup|webview|edgeupdate|msiexec|nsis' } |
+        Select-Object ProcessId, ParentProcessId, Name, CommandLine |
+        Format-List | Out-String | Write-Host
+      Stop-Process -Id $setup.Id -Force -ErrorAction SilentlyContinue
+      throw 'Offline installer timed out; inspect prerequisite child processes above'
+    }
+    if ($setup.ExitCode -ne 0) { throw "Offline installer returned $($setup.ExitCode)" }
+    $installedRuntime = Get-WebViewRuntime
+    if (-not $installedRuntime) { throw 'Embedded installer did not register WebView2 while offline' }
+    Write-Host "Offline installation registered WebView2 $installedRuntime."
+  }
+  $installDir = Join-Path $env:LOCALAPPDATA 'IT Learning Lab'
+  $appExe = Get-ChildItem $installDir -Filter 'it-learning-lab.exe' -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+  if (-not $appExe) { throw "Installed executable not found in $installDir" }
+  foreach ($notice in @('RUST-DEPENDENCIES.txt','RUST-MPL-SOURCES.txt','MICROSOFT-WEBVIEW2-SDK-BSD.txt','MICROSOFT-WEBVIEW2-RUNTIME.txt')) {
+    if (-not (Get-ChildItem $installDir -Filter $notice -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1)) {
+      throw "Installed notice missing: $notice"
+    }
+  }
+  if ($Phase -eq 'incident') {
+    node scripts/verify-windows-native.mjs $appExe.FullName
+    if ($LASTEXITCODE -ne 0) { throw "Native incident test failed ($LASTEXITCODE)" }
+  }
+  if (-not (Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue)) { throw 'Outbound firewall rule was removed during the test' }
+  if (Can-Connect $remote) { throw 'Outbound isolation was lost during the test' }
+  Write-Host "PASS: $Phase phase completed while outbound traffic was blocked."
+} finally {
+  Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue | Remove-NetFirewallRule
+  Stop-Process -Id $guard.Id -Force -ErrorAction SilentlyContinue
+  Write-Host 'Removed temporary outbound firewall rule.'
+}

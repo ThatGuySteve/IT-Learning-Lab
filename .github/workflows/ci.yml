@@ -1,0 +1,80 @@
+name: Verify incident
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Install Playwright Chromium
+        timeout-minutes: 8
+        env:
+          DEBUG: pw:install
+        run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+  windows-installer:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+      - run: npm run tauri build -- --bundles nsis -- --locked
+      - name: Install the Windows app and prerequisite offline
+        shell: pwsh
+        timeout-minutes: 10
+        run: ./scripts/verify-windows-offline.ps1 -Phase install
+      - name: Exercise the installed Windows app offline
+        shell: pwsh
+        timeout-minutes: 10
+        run: ./scripts/verify-windows-offline.ps1 -Phase incident
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-native-test-evidence
+          path: test-results/windows-native/*
+          if-no-files-found: ignore
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-nsis-experimental
+          path: src-tauri/target/release/bundle/nsis/*-setup.exe
+          if-no-files-found: error
+          retention-days: 7
+  windows-native-persistence:
+    runs-on: windows-2022
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+      - run: npm run tauri build -- --bundles nsis -- --locked
+      - name: Verify native persistence with app networking blocked
+        shell: pwsh
+        timeout-minutes: 10
+        run: ./scripts/verify-windows-persistence.ps1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-persistence-evidence
+          path: test-results/windows-native/*
+          if-no-files-found: ignore
+          retention-days: 7
