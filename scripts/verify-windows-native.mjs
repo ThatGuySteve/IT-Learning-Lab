@@ -34,6 +34,7 @@ async function launch(port) {
       const context = browser.contexts()[0];
       page = context.pages()[0] ?? await context.waitForEvent("page", { timeout: 10000 });
       await page.waitForLoadState("domcontentloaded");
+      if (process.env.IT_LAB_WEBVIEW_OFFLINE === "true") await context.setOffline(true);
       return;
     } catch (e) { error = e; await delay(1000); }
   }
